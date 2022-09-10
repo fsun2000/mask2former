@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_titanrtx_short
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=demo
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:05:00
+#SBATCH --mem=16000M
+#SBATCH --output=job_logs/demo
+#SBATCH --mail-type=END
+#SBATCH --mail-user=fengyuansun2000@gmail.com
+
+module purge
+module load 2021
+module load CUDA/11.3.1
+
+source activate m2f
+
+cd $HOME/mask2former/Mask2Former
+srun python -u demo/demo.py --config-file configs/ade20k/semantic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_160k_res640.yaml \
+  --input demo/input_0.png --output demo/output_0.png \
+  --opts MODEL.WEIGHTS https://dl.fbaipublicfiles.com/maskformer/mask2former/ade20k/semantic/maskformer2_swin_large_IN21k_384_bs16_160k_res640/model_final_6b4a3a.pkl
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_short
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=colab_demo
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:05:00
+#SBATCH --mem=16000M
+#SBATCH --output=job_logs/colab_demo
+#SBATCH --mail-type=END
+#SBATCH --mail-user=fengyuansun2000@gmail.com
+
+module purge
+module load 2021
+module load CUDA/11.3.1
+
+source activate m2f
+
+cd $HOME/mask2former/Mask2Former
+srun python -u colab_demo.py

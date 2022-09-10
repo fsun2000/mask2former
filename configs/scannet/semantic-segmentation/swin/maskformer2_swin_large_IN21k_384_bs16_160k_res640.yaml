@@ -15,23 +15,23 @@ MODEL:
   PIXEL_MEAN: [123.675, 116.280, 103.530]
   PIXEL_STD: [58.395, 57.120, 57.375]
 INPUT:
-  MIN_SIZE_TRAIN: !!python/object/apply:eval ["[int(x * 0.1 * 640) for x in range(5, 21)]"]
+  MIN_SIZE_TRAIN: !!python/object/apply:eval ["[int(x * 0.1 * 480) for x in range(5, 21)]"]
   MIN_SIZE_TRAIN_SAMPLING: "choice"
-  MIN_SIZE_TEST: 640 # 640 512
-  MAX_SIZE_TRAIN: 2560 # 2560 2048
-  MAX_SIZE_TEST: 2560 # 2560 2048
+  MIN_SIZE_TEST: 480
+  MAX_SIZE_TRAIN: 1920
+  MAX_SIZE_TEST: 1920
   CROP:
     ENABLED: True
     TYPE: "absolute"
-    SIZE: (240, 360) # (640, 640)
+    SIZE: (480, 640)
     SINGLE_CATEGORY_MAX_AREA: 1.0
   COLOR_AUG_SSD: True
-  SIZE_DIVISIBILITY: -1 # 640  # used in dataset mapper
+  SIZE_DIVISIBILITY: 640  # used in dataset mapper
   FORMAT: "RGB"
 TEST:
   EVAL_PERIOD: 5000
   AUG:
     ENABLED: False
-    MIN_SIZES: [256, 384, 512, 640, 768, 896] # [320, 480, 640, 800, 960, 1120]
-    MAX_SIZE: 3584 # 4480
+    MIN_SIZES: [320, 480, 640, 800, 960, 1120]
+    MAX_SIZE: 4480
     FLIP: True

@@ -70,7 +70,7 @@ def get_parser():
 
     parser.add_argument(
         "--save-frames",
-        default=False,
+        default=True,
         help="Save frame level image outputs.",
     )
 
@@ -138,23 +138,26 @@ if __name__ == "__main__":
                 len(predictions["pred_scores"]), time.time() - start_time
             )
         )
+        
+        print(predictions)
 
         if args.output:
             if args.save_frames:
                 for path, _vis_output in zip(args.input, visualized_output):
                     out_filename = os.path.join(args.output, os.path.basename(path))
                     _vis_output.save(out_filename)
+  
+              # Don't save video
+#             H, W = visualized_output[0].height, visualized_output[0].width
 
-            H, W = visualized_output[0].height, visualized_output[0].width
-
-            cap = cv2.VideoCapture(-1)
-            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-            out = cv2.VideoWriter(os.path.join(args.output, "visualization.mp4"), fourcc, 10.0, (W, H), True)
-            for _vis_output in visualized_output:
-                frame = _vis_output.get_image()[:, :, ::-1]
-                out.write(frame)
-            cap.release()
-            out.release()
+#             cap = cv2.VideoCapture(-1)
+#             fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+#             out = cv2.VideoWriter(os.path.join(args.output, "visualization.mp4"), fourcc, 10.0, (W, H), True)
+#             for _vis_output in visualized_output:
+#                 frame = _vis_output.get_image()[:, :, ::-1]
+#                 out.write(frame)
+#             cap.release()
+#             out.release()
 
     elif args.video_input:
         video = cv2.VideoCapture(args.video_input)

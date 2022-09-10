@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_titanrtx_shared
+#SBATCH --gres=gpu:titanrtx:1
+#SBATCH --job-name=eval_scannet
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=12
+#SBATCH --time=10:00:00
+#SBATCH --mem=64000M
+#SBATCH --output=job_logs/eval_scannet_train_test.out
+
+module purge
+module load 2021
+module load CUDA/11.3.1
+
+source activate m2f
+
+cd $HOME/mask2former/Mask2Former
+python train_net.py \
+  --config-file configs/scannet/semantic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_160k_res640.yaml \
+  --eval-only MODEL.WEIGHTS output/swin_large_fullscannet_september/model_0034999.pth

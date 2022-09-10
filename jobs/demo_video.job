@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_short
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=demo_video
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:05:00
+#SBATCH --mem=8000M
+#SBATCH --output=job_logs/demo_video
+#SBATCH --mail-type=END
+#SBATCH --mail-user=fengyuansun2000@gmail.com
+
+module purge
+module load 2021
+module load CUDA/11.3.1
+
+source activate m2f
+
+cd $HOME/mask2former/Mask2Former
+srun python -u demo_video/demo.py --config-file configs/youtubevis_2021/swin/video_maskformer2_swin_large_IN21k_384_bs16_8ep.yaml \
+  --input demo_video/input_frames/*.png --output demo_video/output_frames \
+  --opts MODEL.WEIGHTS https://dl.fbaipublicfiles.com/maskformer/video_mask2former/ytvis_2021/video_maskformer2_swin_large_IN21k_384_bs16_8ep/model_final_4da256.pkl
+
