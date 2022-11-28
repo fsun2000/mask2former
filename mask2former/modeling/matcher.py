@@ -103,6 +103,7 @@ class HungarianMatcher(nn.Module):
         for b in range(bs):
 
             out_prob = outputs["pred_logits"][b].softmax(-1)  # [num_queries, num_classes]
+                        
             tgt_ids = targets[b]["labels"]
             
 #             print("out_prob.shape :", out_prob.shape)

@@ -9,4 +9,5 @@ from . import (
     register_mapillary_vistas_panoptic,
     register_replica,
     register_scannet,
+    register_scannet25k
 )

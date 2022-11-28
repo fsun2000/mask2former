@@ -14,8 +14,8 @@ MODEL:
     # NORM: "SyncBN"
     RES5_MULTI_GRID: [1, 1, 1]  # not used
 DATASETS:
-  TRAIN: ("scannet_sem_seg_train",)
-  TEST: ("scannet_sem_seg_val",)
+  TRAIN: ("scannet25k_sem_seg_train",)
+  TEST: ("scannet25k_sem_seg_val",)
 SOLVER:
   IMS_PER_BATCH: 16
   BASE_LR: 0.0001
@@ -49,7 +49,7 @@ INPUT:
   FORMAT: "RGB"
   DATASET_MAPPER_NAME: "mask_former_semantic"
 TEST:
-  EVAL_PERIOD: 5000
+  EVAL_PERIOD: 1000
   AUG:
     ENABLED: False
     MIN_SIZES: [256, 384, 512, 640, 768, 896]
@@ -57,5 +57,5 @@ TEST:
     FLIP: True
 DATALOADER:
   FILTER_EMPTY_ANNOTATIONS: True
-  NUM_WORKERS: 2
+  NUM_WORKERS: 5
 VERSION: 2

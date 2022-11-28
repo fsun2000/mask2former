@@ -58,6 +58,51 @@ from mask2former import (
     add_maskformer2_config,
 )
 
+# Custom Validation Loss Hook
+from detectron2.data.build import build_detection_test_loader
+from detectron2.engine import HookBase
+from detectron2.engine.hooks import PeriodicWriter
+
+class ValLossHook(HookBase):
+    
+    def __init__(self, cfg):
+        super().__init__()
+        self.cfg = cfg.clone()
+        
+        # Semantic segmentation dataset mapper
+        if cfg.INPUT.DATASET_MAPPER_NAME == "mask_former_semantic":
+            # Keep in training mode to apply augmentation. Need this in order to calculate loss.
+            mapper = MaskFormerSemanticDatasetMapper(cfg, is_train=True)
+            
+        self._loader = build_detection_test_loader(self.cfg, "scannet25k_sem_seg_val", mapper=mapper)
+        self.iter_feng = iter(self._loader)
+        
+                
+    def after_step(self):
+        """
+            After each step calculates the validation loss and adds it to the train storage
+        """
+        try:
+            data = next(self.iter_feng)
+        except StopIteration:
+            # StopIteration is thrown if dataset ends
+            # reinitialize dataloader 
+            self.iter_feng = iter(self._loader)
+            data = next(self.iter_feng) 
+
+        with torch.no_grad():
+            loss_dict = self.trainer.model(data)            
+            losses = sum(loss_dict.values())
+            assert torch.isfinite(losses).all(), loss_dict
+
+            loss_dict_reduced = {"val_" + k: v.item() for k, v in comm.reduce_dict(loss_dict).items()}
+            losses_reduced = sum(loss for loss in loss_dict_reduced.values())
+            
+            if comm.is_main_process():
+                self.trainer.storage.put_scalars(val_total_loss=losses_reduced, 
+                                                 **loss_dict_reduced)
+
+
 
 class Trainer(DefaultTrainer):
     """
@@ -311,6 +356,20 @@ def main(args):
         return res
 
     trainer = Trainer(cfg)
+    
+    ### EXPERIMENTAL (FENG)
+    # creates a hook that after each iter calculates the validation loss on the next batch
+    # Register the hoooks
+    trainer.register_hooks(
+        [ValLossHook(cfg)]
+    )
+    
+    # The PeriodicWriter needs to be the last hook, otherwise it wont have access to valloss metrics 
+    # Ensure PeriodicWriter is the last called hook
+    periodic_writer_hook = [hook for hook in trainer._hooks if isinstance(hook, PeriodicWriter)]
+    all_other_hooks = [hook for hook in trainer._hooks if not isinstance(hook, PeriodicWriter)]
+    trainer._hooks = all_other_hooks + periodic_writer_hook
+    
     trainer.resume_or_load(resume=args.resume)
     return trainer.train()
 
