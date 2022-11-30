@@ -91,8 +91,8 @@ def get_scannet25k_dicts(mode):
     elif mode == 'test':
         source_path = 'scans_test'    
         
-    
-    subsample_every = 8
+    train_subsample_every = 1
+    val_subsample_every = 4
 
 #     # Uncomment when running eval_scannet.job on training data instead of validation data
 #     if mode == 'train':
@@ -104,7 +104,14 @@ def get_scannet25k_dicts(mode):
         
     with open(os.path.join(root_dir, fragment_foldername, 'fragments_{}.pkl'.format(mode)), 'rb') as f:
         metas = np.array(pickle.load(f))
-        
+       
+        if mode == 'train':
+            subsample_every = train_subsample_every
+        elif mode == 'val':
+            subsample_every = val_subsample_every
+        else:
+            raise ValueError('unrecognised dataset split')
+
         if subsample_every > 1:
             subsample_idx = np.arange(0, len(metas), subsample_every)
             metas = metas[subsample_idx]

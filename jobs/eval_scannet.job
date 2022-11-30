@@ -5,13 +5,13 @@
 #SBATCH --job-name=eval
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
-#SBATCH --time=03:00:00
+#SBATCH --time=15:00:00
 #SBATCH --mem=47500M
-#SBATCH --output=job_logs/eval/scannet_train_swin_l_final.out
+#SBATCH --output=job_logs/eval/scannet_val_swin_l_early.out
 
 module purge
 
 source activate m2f
 
 cd $HOME/mask2former/Mask2Former
-python train_net.py --config-file configs/scannet25k/semantic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_160k_res640.yaml --eval-only MODEL.WEIGHTS output/swin_large_fullscannet/model_final.pth
+python train_net.py --config-file configs/scannet/semantic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_160k_res640.yaml --eval-only MODEL.WEIGHTS output/swin_large_fullscannet/model_0004999.pth
