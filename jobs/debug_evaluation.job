@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_titanrtx_shared
+#SBATCH --gres=gpu:titanrtx:1
+#SBATCH --job-name=early_mask
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=6
+#SBATCH --time=5:00:00
+#SBATCH --mem=47000M
+#SBATCH --output=job_logs/eval_m2f_swin_l_22k_20000.out
+
+module purge
+source activate m2f
+
+cd $HOME/mask2former/Mask2Former
+
+export M2F_PRED_SAVE_FOLDER_NAME=m2f_swin_l_22k_20000
+
+python train_net.py \
+  --eval-only \
+  --config-file configs/scannet25k/semantic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_22k_res640_smallcrop.yaml \
+  --num-gpus 1 SOLVER.IMS_PER_BATCH 16 SOLVER.BASE_LR 0.0001 SOLVER.MAX_ITER 5000 \
+  OUTPUT_DIR ./output/eval_m2f_swin_l_22k_5000 \
+  MODEL.WEIGHTS /project/fsun/mask2former/output/swin_l_22k_bs16_crop640/model_0019999.pth \
+  TEST.EVAL_PERIOD 5000 TEST.INFERENCE_BATCH_SIZE 1 SOLVER.CHECKPOINT_PERIOD 5000
+  
+

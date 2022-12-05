@@ -195,6 +195,7 @@ class Trainer(DefaultTrainer):
     def build_train_loader(cls, cfg):
         # Semantic segmentation dataset mapper
         if cfg.INPUT.DATASET_MAPPER_NAME == "mask_former_semantic":
+            print("MaskFormerSemanticDatasetMapper built")
             mapper = MaskFormerSemanticDatasetMapper(cfg, True)
             return build_detection_train_loader(cfg, mapper=mapper)
         # Panoptic segmentation dataset mapper
@@ -350,6 +351,7 @@ def main(args):
         )
         res = Trainer.test(cfg, model)
         if cfg.TEST.AUG.ENABLED:
+            print("Evaluating model with TTA")
             res.update(Trainer.test_with_TTA(cfg, model))
         if comm.is_main_process():
             verify_results(cfg, res)

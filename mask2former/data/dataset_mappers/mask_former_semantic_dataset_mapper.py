@@ -121,11 +121,13 @@ class MaskFormerSemanticDatasetMapper:
                     dataset_dict["file_name"]
                 )
             )
-
+                    
+        
         aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
         aug_input, transforms = T.apply_transform_gens(self.tfm_gens, aug_input)
         image = aug_input.image
         sem_seg_gt = aug_input.sem_seg
+        
 
         # Pad image and segmentation label here!
         image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))

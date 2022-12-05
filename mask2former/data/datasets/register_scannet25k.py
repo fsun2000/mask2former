@@ -92,7 +92,7 @@ def get_scannet25k_dicts(mode):
         source_path = 'scans_test'    
         
     train_subsample_every = 1
-    val_subsample_every = 4
+    val_subsample_every = 1
 
 #     # Uncomment when running eval_scannet.job on training data instead of validation data
 #     if mode == 'train':

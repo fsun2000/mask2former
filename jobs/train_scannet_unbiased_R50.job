@@ -5,9 +5,9 @@
 #SBATCH --job-name=R50_train
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24
-#SBATCH --time=112:00:00
+#SBATCH --time=120:00:00
 #SBATCH --mem=90000M
-#SBATCH --output=job_logs/train_scannet_unbiased_R50_4.out
+#SBATCH --output=job_logs/train_scannet_unbiased_R50_fromImageNet.out
 
 module purge
 source activate m2f
@@ -16,5 +16,5 @@ cd $HOME/mask2former/Mask2Former
 python train_net.py \
   --config-file configs/scannet25k/semantic-segmentation/maskformer2_R50_bs16_160k.yaml \
   --num-gpus 4 SOLVER.IMS_PER_BATCH 16 SOLVER.BASE_LR 0.0001 SOLVER.MAX_ITER 160000 \
-  OUTPUT_DIR ./output/scannet_unbiased_R50_4 MODEL.WEIGHTS https://dl.fbaipublicfiles.com/detectron2/ImageNetPretrained/torchvision/R-50.pkl \
+  OUTPUT_DIR /project/fsun/mask2former/output/scannet_unbiased_R50_fromImageNet MODEL.WEIGHTS https://dl.fbaipublicfiles.com/detectron2/ImageNetPretrained/torchvision/R-50.pkl \
   TEST.EVAL_PERIOD 5000

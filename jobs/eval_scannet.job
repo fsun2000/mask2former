@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=6
 #SBATCH --time=15:00:00
 #SBATCH --mem=47500M
-#SBATCH --output=job_logs/eval/scannet_val_swin_l_early.out
+#SBATCH --output=job_logs/eval/scannet_val_swin_l_late.out
 
 module purge
 
