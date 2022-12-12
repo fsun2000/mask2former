@@ -70,7 +70,7 @@ def _get_scannet25k_meta():
 
 def register_all_scannet25k_recursive(root):
     meta = _get_scannet25k_meta()
-    for mode, dirname in [("train", "training"), ("val", "validation")]:
+    for mode, dirname in [("trainval", "training"), ("test", "validation")]:
         name = f"scannet25k_sem_seg_{mode}"
         DatasetCatalog.register(name, lambda mode=mode: get_scannet25k_dicts(mode))
         
@@ -86,38 +86,81 @@ def register_all_scannet25k_recursive(root):
 def get_scannet25k_dicts(mode): 
     root_dir = _root
     
-    if mode in ['train', 'val']:
-        source_path = 'scans'
-    elif mode == 'test':
-        source_path = 'scans_test'    
+    
         
-    train_subsample_every = 1
-    val_subsample_every = 1
-
+    
 #     # Uncomment when running eval_scannet.job on training data instead of validation data
 #     if mode == 'train':
 #         mode = 'val'
 #     elif mode == 'val':
 #         mode = 'train'
-
-    fragment_foldername = 'axis_aligned_metas'
+#     elif mode == 'trainval':
+#         mode = 'test'
+#     elif mode == 'test':
+#         mode = 'trainval'
         
-    with open(os.path.join(root_dir, fragment_foldername, 'fragments_{}.pkl'.format(mode)), 'rb') as f:
-        metas = np.array(pickle.load(f))
-       
-        if mode == 'train':
-            subsample_every = train_subsample_every
-        elif mode == 'val':
-            subsample_every = val_subsample_every
-        else:
-            raise ValueError('unrecognised dataset split')
+        
+    if mode in ['train', 'val', 'trainval']:
+        source_path = 'scans'
+        fragment_foldername = 'axis_aligned_metas'
+    elif mode == 'test':
+        source_path = 'scans_test'    
+        fragment_foldername = 'axis_aligned_metas_test'
 
-        if subsample_every > 1:
-            subsample_idx = np.arange(0, len(metas), subsample_every)
-            metas = metas[subsample_idx]
-        metas = list(metas)
+        
+    train_subsample_every = 1
+    val_subsample_every = 1
+
+        
+        
+    ### TEMPORARY FOR TRAINING ON BOTH TRAINING AND VALIDATION DATA
+    if mode == 'trainval':
+#         if mode == 'train':
+#             train_subsample_every = 1
+#             val_subsample_every = 1
+#         elif mode == 'val':
+#             train_subsample_every = 24
+#             val_subsample_every = 24
+        meta_mode = ['train', 'val']
+        full_metas = []
+        for m in meta_mode:
+            with open(os.path.join(root_dir, fragment_foldername, 'fragments_{}.pkl'.format(m)), 'rb') as f:
+                metas = np.array(pickle.load(f))
+
+                if m == 'train':
+                    subsample_every = 1
+                elif m == 'val':
+                    subsample_every = 1
+                else:
+                    raise ValueError('unrecognised dataset split')
+
+                if subsample_every > 1:
+                    subsample_idx = np.arange(0, len(metas), subsample_every)
+                    metas = metas[subsample_idx]
+                metas = list(metas)
+            full_metas += metas
+        metas = full_metas        
+    else:
+        with open(os.path.join(root_dir, fragment_foldername, 'fragments_{}.pkl'.format(mode)), 'rb') as f:
+            metas = np.array(pickle.load(f))
+
+            if mode == 'train':
+                subsample_every = train_subsample_every
+            elif mode == 'val':
+                subsample_every = val_subsample_every
+            elif mode == 'test':
+                subsample_every = 1
+            else:
+                raise ValueError('unrecognised dataset split')
+
+            if subsample_every > 1:
+                subsample_idx = np.arange(0, len(metas), subsample_every)
+                metas = metas[subsample_idx]
+            metas = list(metas)
+                
     
-    
+    # Use placeholder to be able to generate 2D semantic predictions on the ScanNet 3D benchmark Test set
+    placeholder_sem_seg_file = '/project/fsun/data/scannet/scans/scene0000_00/label-filt-scannet20/0.png'
     dataset_dicts = []
     for meta in metas:
         scene_id = meta['scene']
@@ -129,11 +172,31 @@ def get_scannet25k_dicts(mode):
         for i in meta['image_ids']:
             record = {}                
             record["file_name"] = os.path.join(rgb_img_dir, "{}.png".format(i))
-            record["sem_seg_file_name"] = os.path.join(gt_img_dir, "{}.png".format(i))
+            record["sem_seg_file_name"] = os.path.join(gt_img_dir, "{}.png".format(i)) if mode != 'test' else placeholder_sem_seg_file
             record["image_id"] = scene_id + '_' + str(meta['fragment_id']) + '_' + str(i)
             record["height"] = 480
             record["width"] = 640
             dataset_dicts.append(record)
+
+# Uncomment to generate 2D benchmark segmentation images
+        
+#     # Use placeholder to be able to generate 2D semantic predictions on the ScanNet benchmark Test set
+#     placeholder_sem_seg_file = '/project/fsun/data/scannet/scans/scene0000_00/label-filt-scannet20/0.png'
+#     for scene_id in os.listdir("/project/fsun/data/scannet/test_frames_2d/scannet_frames_test/"):
+        
+#         rgb_img_dir = os.path.join("/project/fsun/data/scannet/test_frames_2d/scannet_frames_test/", scene_id, 'color_resized')
+#         gt_img_dir = os.path.join("/project/fsun/data/scannet/test_frames_2d/scannet_frames_test/", scene_id, 'label-filt-scannet20')
+
+
+#         for img_name in os.listdir(rgb_img_dir):
+#             record = {}                
+#             record["file_name"] = os.path.join(rgb_img_dir, img_name)
+#             record["sem_seg_file_name"] = os.path.join(gt_img_dir, "{}.png".format(i)) if mode != 'test' else placeholder_sem_seg_file
+#             record["image_id"] = scene_id + '_' + str(img_name)
+#             record["height"] = 480
+#             record["width"] = 640
+#             dataset_dicts.append(record)
+
             
     print(mode)
     print('n images: ', len(dataset_dicts))

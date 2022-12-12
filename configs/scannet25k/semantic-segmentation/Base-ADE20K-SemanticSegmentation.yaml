@@ -14,8 +14,8 @@ MODEL:
     # NORM: "SyncBN"
     RES5_MULTI_GRID: [1, 1, 1]  # not used
 DATASETS:
-  TRAIN: ("scannet25k_sem_seg_train",)
-  TEST: ("scannet25k_sem_seg_val",)
+  TRAIN: ("scannet25k_sem_seg_trainval",)
+  TEST: ("scannet25k_sem_seg_test",)
 SOLVER:
   IMS_PER_BATCH: 16
   BASE_LR: 0.0001

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_titanrtx_shared
+#SBATCH --gres=gpu:titanrtx:4
+#SBATCH --job-name=gen_masks
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=24
+#SBATCH --time=5:00:00
+#SBATCH --mem=40000M
+#SBATCH --output=job_logs/scannet_2d_benchmark_predictions.out
+
+module purge
+source activate m2f
+
+cd $HOME/mask2former/Mask2Former
+
+export M2F_PRED_SAVE_FOLDER_NAME=2d_benchmark_preds
+
+python train_net.py \
+  --eval-only \
+  --config-file configs/scannet25k/semantic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_22k_res640_smallcrop.yaml \
+  --num-gpus 4 SOLVER.IMS_PER_BATCH 16 SOLVER.BASE_LR 0.0001 SOLVER.MAX_ITER 5000 \
+  OUTPUT_DIR ./output/scannet_trainval_submission \
+  MODEL.WEIGHTS /project/fsun/mask2former/output/train_scannet_test_submission_bs16_28k/model_0024999.pth \
+  TEST.EVAL_PERIOD 5000 TEST.INFERENCE_BATCH_SIZE 1 SOLVER.CHECKPOINT_PERIOD 5000
+  
+
