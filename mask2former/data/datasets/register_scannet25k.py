@@ -70,7 +70,7 @@ def _get_scannet25k_meta():
 
 def register_all_scannet25k_recursive(root):
     meta = _get_scannet25k_meta()
-    for mode, dirname in [("trainval", "training"), ("test", "validation")]:
+    for mode, dirname in [("train", "training"), ("val", "validation")]:
         name = f"scannet25k_sem_seg_{mode}"
         DatasetCatalog.register(name, lambda mode=mode: get_scannet25k_dicts(mode))
         
